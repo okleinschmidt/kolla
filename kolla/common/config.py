@@ -289,6 +289,10 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/requirements/'
                      'requirements-${openstack_branch}.tar.gz')},
+    'adjutant-base': {
+        'type': 'url',
+        'location': ('$tarballs_base/openstack/adjutant/'
+                     'adjutant-${openstack_branch}.tar.gz')},    
     'aodh-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/aodh/'
@@ -1132,6 +1136,10 @@ USERS = {
     'masakari-user': {
         'uid': 42485,
         'gid': 42485,
+    },
+    'adjutant-user': {
+        'uid': 42486,
+        'gid': 42486,
     }
 }
 
