@@ -7,6 +7,7 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
 
 {% import "macros.j2" as macros with context %}
 
+{{ macros.add_binary_source_envs() }}
 {{ macros.enable_extra_repos(['opstools']) }}
 
 {% if install_type == 'binary' %}
@@ -195,10 +196,6 @@ ENV DEBIAN_FRONTEND noninteractive
     {% endif %}
 
 {{ macros.install_packages(openstack_base_packages | customizable("packages")) }}
-
-{% block source_install_python_pip %}
-{{ macros.get_pip() }}
-{% endblock %}
 
 {% set openstack_base_pip_packages = [
         'Babel',

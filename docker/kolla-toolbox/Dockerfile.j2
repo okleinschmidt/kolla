@@ -10,6 +10,7 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
 
 {% import "macros.j2" as macros with context %}
 
+{{ macros.add_binary_source_envs() }}
 {{ macros.configure_user(name='ansible') }}
 {{ macros.configure_user(name='rabbitmq') }}
 
@@ -30,6 +31,7 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'mariadb-devel',
         'openssh-clients',
         'openssl-devel',
+        'openvswitch',
         'python3-devel',
         'rabbitmq-server-3.8.*'
         ] %}
@@ -47,15 +49,12 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'libssl-dev',
         'libxslt1-dev',
         'mariadb-client',
+        'openvswitch-switch',
         'python3-dev',
         'rabbitmq-server',
      ] %}
 {% endif %}
 {{ macros.install_packages(kolla_toolbox_packages | customizable("packages")) }}
-
-{% block kolla_toolbox_source_install_python_pip %}
-{{ macros.get_pip() }}
-{% endblock %}
 
 {% set kolla_toolbox_pip_virtualenv_packages = [
         'virtualenv'
@@ -68,10 +67,8 @@ RUN mkdir -p /requirements \
 
 ENV PATH {{ virtualenv_path }}/bin:$PATH
 
-# NOTE(mgoddard): Ansible 2.8.9 broke OpenStack modules.
-# https://bugs.launchpad.net/kolla/+bug/1866181
 {% set kolla_toolbox_pip_packages = [
-        'ansible==2.8.*,!=2.8.9',
+        'ansible==2.9.*',
         'cmd2',
         'influxdb',
         'mysqlclient',

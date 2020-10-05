@@ -24,8 +24,6 @@ LABEL kolla_version="{{ kolla_version }}"
 {% block base_header %}{% endblock %}
 
 ENV KOLLA_BASE_DISTRO={{ base_distro }} \
-    KOLLA_INSTALL_TYPE={{ install_type }} \
-    KOLLA_INSTALL_METATYPE={{ install_metatype }} \
     KOLLA_DISTRO_PYTHON_VERSION={{ distro_python_version }} \
     KOLLA_BASE_ARCH={{ base_arch }}
 
@@ -258,6 +256,7 @@ RUN {{ macros.install_packages(base_centos_yum_repo_packages | customizable("cen
         'ncurses',
         'procps-ng',
         'python3',
+        'python3-pip',
         'socat',
         'sudo',
         'tar',
@@ -329,6 +328,7 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
    'open-iscsi',
    'procps',
    'python3',
+   'python3-pip',
    'socat',
    'sudo',
    'tgt']

@@ -195,9 +195,8 @@ _CLI_OPTS = [
     cfg.BoolOpt('push', default=False,
                 help='Push images after building'),
     cfg.IntOpt('push-threads', default=1, min=1,
-               help=('The number of threads to user while pushing'
-                     ' Images. Note: Docker can not handle threading'
-                     ' push properly')),
+               help=('The number of threads to use while pushing images.'
+                     ' Note: Docker cannot handle threaded pushing properly')),
     cfg.IntOpt('retries', short='r', default=3, min=0,
                help='The number of times to retry while building'),
     cfg.MultiOpt('regex', types.String(), positional=True, required=False,
@@ -254,7 +253,9 @@ _CLI_OPTS = [
     cfg.BoolOpt('enable-unbuildable', default=False,
                 help='Enable images marked as unbuildable'),
     cfg.BoolOpt('summary', default=True,
-                help='Show summary at the end of build')
+                help='Show summary at the end of build'),
+    cfg.BoolOpt('infra-rename', default=False,
+                help='Rename infrastructure images to infra')
 ]
 
 _BASE_OPTS = [
