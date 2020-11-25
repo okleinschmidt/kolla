@@ -80,6 +80,7 @@ LOG = utils.make_a_logger()
 # is irrelevant. Otherwise all must match for skip to happen.
 UNBUILDABLE_IMAGES = {
     'aarch64': {
+        "bifrost-base",      # someone need to get upstream working first
         "monasca-grafana",   # no phantomJS on aarch64
         "prometheus-mtail",  # no aarch64 binary
         "skydive-base",      # no aarch64 binary
@@ -165,21 +166,18 @@ UNBUILDABLE_IMAGES = {
     'debian+binary': {
         "cloudkitty-base",
         "ec2-api",
-        "heat-all",
         "ironic-neutron-agent",
         "nova-serialproxy",
         "novajoin-base",
         "senlin-conductor",  # no binary package
         "senlin-health-manager",  # no binary package
         "tacker-base",
-        "trove-base",
         "neutron-mlnx-agent",
     },
 
     'ubuntu+binary': {
         "cloudkitty-base",
         "ec2-api",
-        "heat-all",
         "ironic-neutron-agent",
         "novajoin-base",
         "rally",
@@ -1168,10 +1166,10 @@ class KollaWorker(object):
             LOG.info("Images that failed to build")
             LOG.info("===========================")
             for name, status in sorted(self.image_statuses_bad.items()):
-                LOG.error('%s Failed with status: %s', name, status)
+                LOG.error('%s Failed with status: %s', name, status.value)
                 results['failed'].append({
                     'name': name,
-                    'status': status,
+                    'status': status.value,
                 })
                 if self.conf.logs_dir and status == Status.ERROR:
                     linkname = os.path.join(self.conf.logs_dir,
