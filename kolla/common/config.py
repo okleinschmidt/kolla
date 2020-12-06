@@ -91,6 +91,7 @@ _PROFILE_OPTS = [
                 help='Main images'),
     cfg.ListOpt('aux',
                 default=[
+                    'adjutant',
                     'aodh',
                     'blazar',
                     'cloudkitty',
@@ -293,7 +294,7 @@ SOURCES = {
     'adjutant-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/adjutant/'
-                     'adjutant-${openstack_branch}.tar.gz')},
+                     'adjutant-stable-victoria.tar.gz')},
     'aodh-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/aodh/'
@@ -363,6 +364,10 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/horizon/'
                      'horizon-stable-victoria.tar.gz')},
+    'horizon-plugin-adjutant-dashboard': {
+        'type': 'url',
+        'location': ('$tarballs_base/openstack/adjutant-ui/'
+                     'adjutant-ui-stable-victoria.tar.gz')},
     'horizon-plugin-blazar-dashboard': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/blazar-dashboard/'

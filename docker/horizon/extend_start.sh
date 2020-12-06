@@ -64,6 +64,14 @@ function config_dashboard {
     fi
 }
 
+function config_adjutant_dashboard {
+    for file in ${SITE_PACKAGES}/adjutant_ui/enabled/_*[^__].py; do
+        config_dashboard "${ENABLE_ADJUTANT}" \
+            "${SITE_PACKAGES}/adjutant_ui/enabled/${file##*/}" \
+            "${SITE_PACKAGES}/openstack_dashboard/local/enabled/${file##*/}"
+    done
+}
+
 function config_blazar_dashboard {
     for file in ${SITE_PACKAGES}/blazar_dashboard/enabled/_*[^__].py; do
         config_dashboard "${ENABLE_BLAZAR}" \
@@ -327,6 +335,7 @@ function settings_changed {
     return ${changed}
 }
 
+config_adjutant_dashboard
 config_blazar_dashboard
 config_cloudkitty_dashboard
 config_designate_dashboard
