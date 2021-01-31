@@ -8,11 +8,12 @@ centos:
   erlang: "rabbitmq_rabbitmq-erlang"
   extras: "extras"
   grafana: "grafana"
-  hacluster: "HighAvailability"
+  hacluster: "ha"
   influxdb: "influxdb"
   logstash: "elasticsearch-kibana-logstash-6.x"
   kibana: "elasticsearch-kibana-logstash-6.x"
   opstools: "centos-opstools"
+  powertools: "powertools"
   rabbitmq: "rabbitmq_rabbitmq-server"
   td-agent: "treasuredata"
 
@@ -24,9 +25,10 @@ centos-aarch64:
   erlang: "centos-rabbitmq-38"
   extras: "extras"
   grafana: "grafana"
-  hacluster: "HighAvailability"
+  hacluster: "ha"
   logstash: "elasticsearch-kibana-logstash-6.x"
   opstools: "centos-opstools"
+  powertools: "powertools"
   rabbitmq: "rabbitmq_rabbitmq-server"
   td-agent: "treasuredata"
 
@@ -36,14 +38,15 @@ centos-ppc64le:
   epel: "epel"
   epel-modular: "epel-modular"
   extras: "extras"
-  hacluster: "HighAvailability"
+  hacluster: "ha"
   logstash: "elasticsearch-kibana-logstash-6.x"
   opstools: "centos-opstools"
+  powertools: "powertools"
   rabbitmq: "rabbitmq_rabbitmq-server"
 
 rhel:
   erlang: "centos-rabbitmq-38"
-  hacluster: "HighAvailability"
+  hacluster: "ha"
   opstools: "centos-opstools"
   rabbitmq: "centos-rabbitmq-38"
 

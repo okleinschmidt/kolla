@@ -22,7 +22,6 @@ kolla_build_sources:
   openstack/cinder: cinder-base
   openstack/cloudkitty: cloudkitty-base
   openstack/designate: designate-base
-  openstack/ec2-api: ec2-api
   openstack/freezer: freezer-base
   openstack/freezer-api: freezer-api
   openstack/glance: glance-base
@@ -30,7 +29,6 @@ kolla_build_sources:
   openstack/heat: heat-base
   openstack/ironic: ironic-base
   openstack/ironic-inspector: ironic-inspector
-  openstack/karbor: karbor-base
   openstack/keystone: keystone-base
   openstack/kuryr: kuryr-base
   openstack/kuryr-libnetwork: kuryr-libnetwork
@@ -61,15 +59,12 @@ kolla_build_sources:
     - neutron-vpnaas-agent
     - neutron-base-plugin-vpnaas-agent
   openstack/nova: nova-base
-  openstack/nova-mksproxy: nova-base-plugin-mksproxy
-  openstack/novajoin: novajoin-base
   openstack/octavia: octavia-base
   openstack/panko:
     - ceilometer-base-plugin-panko
     - panko-base
   openstack/rally: rally
   openstack/sahara: sahara-base
-  openstack/searchlight: searchlight-base
   openstack/senlin: senlin-base
   openstack/solum: solum-base
   swift-base: openstack/swift
@@ -80,7 +75,6 @@ kolla_build_sources:
   openstack/vitrage: vitrage-base
   openstack/vmtp: vmtp
   openstack/watcher: watcher-base
-  openstack/zaqar: zaqar
   openstack/zun: zun-base
 
   # Horizon and its plugins
@@ -91,7 +85,6 @@ kolla_build_sources:
   openstack/freezer-web-ui: horizon-plugin-freezer-web-ui
   openstack/heat-dashboard: horizon-plugin-heat-dashboard
   openstack/ironic-ui: horizon-plugin-ironic-ui
-  openstack/karbor-dashboard: horizon-plugin-karbor-dashboard
   openstack/magnum-ui: horizon-plugin-magnum-ui
   openstack/manila-ui: horizon-plugin-manila-ui
   openstack/mistral-dashboard: horizon-plugin-mistral-dashboard
@@ -100,14 +93,12 @@ kolla_build_sources:
   openstack/neutron-vpnaas-dashboard: horizon-plugin-neutron-vpnaas-dashboard
   openstack/octavia-dashboard: horizon-plugin-octavia-dashboard
   openstack/sahara-dashboard: horizon-plugin-sahara-dashboard
-  openstack/searchlight-ui: horizon-plugin-searchlight-ui
   openstack/senlin-dashboard: horizon-plugin-senlin-dashboard
   openstack/solum-dashboard: horizon-plugin-solum-dashboard
   openstack/tacker-horizon: horizon-plugin-tacker-dashboard
   openstack/trove-dashboard: horizon-plugin-trove-dashboard
   openstack/vitrage-dashboard: horizon-plugin-vitrage-dashboard
   openstack/watcher-dashboard: horizon-plugin-watcher-dashboard
-  openstack/zaqar-ui: horizon-plugin-zaqar-ui
   openstack/zun-ui: horizon-plugin-zun-ui
 
   # Tempest and its plugins
@@ -131,4 +122,3 @@ kolla_build_sources:
   openstack/trove-tempest-plugin: tempest-plugin-trove
   openstack/vitrage-tempest-plugin: tempest-plugin-vitrage
   openstack/watcher-tempest-plugin: tempest-plugin-watcher
-  openstack/zaqar-tempest-plugin: tempest-plugin-zaqar

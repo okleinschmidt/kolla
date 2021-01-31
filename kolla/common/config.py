@@ -50,7 +50,6 @@ TARBALLS_BASE = "https://tarballs.opendev.org"
 _PROFILE_OPTS = [
     cfg.ListOpt('infra',
                 default=[
-                    'certmonger',
                     'cron',
                     'elasticsearch',
                     'etcd',
@@ -64,11 +63,9 @@ _PROFILE_OPTS = [
                     'mariadb',
                     'memcached',
                     'openvswitch',
-                    'ptp',
                     'qdrouterd',
                     'rabbitmq',
                     'redis',
-                    'rsyslog',
                     'skydive',
                     'storm',
                     'tgtd',
@@ -95,13 +92,11 @@ _PROFILE_OPTS = [
                     'blazar',
                     'cloudkitty',
                     'designate',
-                    'ec2-api',
                     'freezer',
                     'gnocchi',
                     'influxdb',
                     'ironic',
                     'kafka',
-                    'karbor',
                     'kuryr',
                     'magnum',
                     'manila',
@@ -109,21 +104,17 @@ _PROFILE_OPTS = [
                     'mistral',
                     'monasca',
                     'murano',
-                    'novajoin',
                     'octavia',
                     'panko',
-                    'qinling',
                     'rally',
                     'redis',
                     'sahara',
-                    'searchlight',
                     'senlin',
                     'solum',
                     'tacker',
                     'telegraf',
                     'trove',
                     'vitrage',
-                    'zaqar',
                     'zookeeper',
                     'zun',
                 ],
@@ -281,7 +272,9 @@ _BASE_OPTS = [
     cfg.StrOpt('squash-tmp-dir',
                help='Temporary directory to be used during squashing'),
     cfg.BoolOpt('clean_package_cache', default=True,
-                help='Clean all package cache.')
+                help='Clean all package cache.'),
+    cfg.ListOpt('allowed-to-fail', default=[],
+                help='Images which are allowed to fail'),
 ]
 
 
@@ -334,10 +327,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/designate/'
                      'designate-${openstack_branch}.tar.gz')},
-    'ec2-api': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/ec2-api/'
-                     'ec2-api-${openstack_branch}.tar.gz')},
     'freezer-api': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/freezer-api/'
@@ -387,10 +376,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/ironic-ui/'
                      'ironic-ui-${openstack_branch}.tar.gz')},
-    'horizon-plugin-karbor-dashboard': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/karbor-dashboard/'
-                     'karbor-dashboard-${openstack_branch}.tar.gz')},
     'horizon-plugin-magnum-ui': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/magnum-ui/'
@@ -423,18 +408,10 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/octavia-dashboard/'
                      'octavia-dashboard-${openstack_branch}.tar.gz')},
-    'horizon-plugin-qinling-dashboard': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/qinling-dashboard/'
-                     'qinling-dashboard-${openstack_branch}.tar.gz')},
     'horizon-plugin-sahara-dashboard': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/sahara-dashboard/'
                      'sahara-dashboard-${openstack_branch}.tar.gz')},
-    'horizon-plugin-searchlight-ui': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/searchlight-ui/'
-                     'searchlight-ui-${openstack_branch}.tar.gz')},
     'horizon-plugin-senlin-dashboard': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/senlin-dashboard/'
@@ -459,10 +436,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/watcher-dashboard/'
                      'watcher-dashboard-${openstack_branch}.tar.gz')},
-    'horizon-plugin-zaqar-ui': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/zaqar-ui/'
-                     'zaqar-ui-${openstack_branch}.tar.gz')},
     'horizon-plugin-zun-ui': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/zun-ui/'
@@ -475,10 +448,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/ironic-inspector/'
                      'ironic-inspector-${openstack_branch}.tar.gz')},
-    'karbor-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/karbor/'
-                     'karbor-${openstack_branch}.tar.gz')},
     'keystone-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/keystone/'
@@ -604,14 +573,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/blazar-nova/'
                      'blazar-nova-${openstack_branch}.tar.gz')},
-    'nova-base-plugin-mksproxy': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/nova-mksproxy/'
-                     'nova-mksproxy-master.tar.gz')},
-    'novajoin-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/novajoin/'
-                     'novajoin-master.tar.gz')},
     'octavia-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/octavia/'
@@ -628,10 +589,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/placement/'
                      'placement-${openstack_branch}.tar.gz')},
-    'qinling-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/qinling/'
-                     'qinling-${openstack_branch}.tar.gz')},
     'tempest-plugin-tempest-conf': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/python-tempestconf/'
@@ -708,18 +665,14 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/watcher-tempest-plugin/'
                      'watcher-tempest-plugin-master.tar.gz')},
-    'tempest-plugin-zaqar': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/zaqar-tempest-plugin/'
-                     'zaqar-tempest-plugin-master.tar.gz')},
     'rally': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/rally/'
-                     'rally-3.1.0.tar.gz')},
+                     'rally-3.2.0.tar.gz')},
     'rally-plugin-openstack': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/rally-openstack/'
-                     'rally-openstack-2.0.0.tar.gz')},
+                     'rally-openstack-2.1.0.tar.gz')},
     'sahara-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/sahara/'
@@ -748,10 +701,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/sahara-plugin-vanilla/'
                      'sahara-plugin-vanilla-${openstack_branch}.tar.gz')},
-    'searchlight-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/searchlight/'
-                     'searchlight-${openstack_branch}.tar.gz')},
     'senlin-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/senlin/'
@@ -792,10 +741,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/watcher/'
                      'watcher-${openstack_branch}.tar.gz')},
-    'zaqar-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/zaqar/'
-                     'zaqar-${openstack_branch}.tar.gz')},
     'zun-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/zun/'
@@ -966,10 +911,6 @@ USERS = {
         'uid': 42441,
         'gid': 42441,
     },
-    'searchlight-user': {
-        'uid': 42442,
-        'gid': 42442,
-    },
     'senlin-user': {
         'uid': 42443,
         'gid': 42443,
@@ -1006,10 +947,6 @@ USERS = {
         'uid': 42451,
         'gid': 42451,
     },
-    'zaqar-user': {
-        'uid': 42452,
-        'gid': 42452,
-    },
     'zookeeper-user': {
         'uid': 42453,
         'gid': 42453,
@@ -1021,10 +958,6 @@ USERS = {
     'memcached-user': {
         'uid': 42457,
         'gid': 42457,
-    },
-    'karbor-user': {
-        'uid': 42458,
-        'gid': 42458,
     },
     'vitrage-user': {
         'uid': 42459,
@@ -1069,10 +1002,6 @@ USERS = {
     'kuryr-user': {
         'uid': 42469,
         'gid': 42469,
-    },
-    'novajoin-user': {
-        'uid': 42470,
-        'gid': 42470,
     },
     'blazar-user': {
         'uid': 42471,
@@ -1125,10 +1054,6 @@ USERS = {
     'cyborg-user': {
         'uid': 42483,
         'gid': 42483,
-    },
-    'qinling-user': {
-        'uid': 42484,
-        'gid': 42484,
     },
     'masakari-user': {
         'uid': 42485,

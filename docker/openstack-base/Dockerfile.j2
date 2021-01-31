@@ -129,7 +129,6 @@ ENV DEBIAN_FRONTEND noninteractive
             'python3-openstackclient',
             'python3-oslo.log',
             'python3-osprofiler',
-            'python3-pip',
             'python3-psycopg2',
             'python3-pymemcache',
             'python3-pymysql',
@@ -195,6 +194,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
     {% endif %}
 
+{{ macros.enable_extra_repos(['powertools']) }}
 {{ macros.install_packages(openstack_base_packages | customizable("packages")) }}
 
 {% set openstack_base_pip_packages = [
@@ -215,8 +215,11 @@ ENV DEBIAN_FRONTEND noninteractive
         'anyjson',
         'aodhclient',
         'appdirs',
+        'automaton',
         'bcrypt',
         'cachetools',
+        'castellan',
+        'click',
         'cliff',
         'cmd2',
         'cryptography',
@@ -230,6 +233,7 @@ ENV DEBIAN_FRONTEND noninteractive
         'futurist',
         'gnocchiclient',
         'greenlet',
+        'httplib2',
         'iso8601',
         'jinja2',
         'jsonpatch',
@@ -244,6 +248,9 @@ ENV DEBIAN_FRONTEND noninteractive
         'netaddr',
         'netifaces',
         'os-client-config',
+        'os-brick',
+        'os-traits',
+        'os-win',
         'oslo.concurrency',
         'oslo.config',
         'oslo.context',
@@ -253,11 +260,17 @@ ENV DEBIAN_FRONTEND noninteractive
         'oslo.messaging',
         'oslo.middleware',
         'oslo.policy',
+        'oslo.privsep',
+        'oslo.reports',
+        'oslo.rootwrap',
         'oslo.serialization',
         'oslo.service',
+        'oslo.upgradecheck',
         'oslo.utils',
+        'oslo.versionedobjects',
         'oslo.vmware',
         'osprofiler',
+        'paramiko',
         'pbr',
         'pecan',
         'pika',

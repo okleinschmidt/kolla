@@ -101,14 +101,9 @@ UNBUILDABLE_IMAGES = {
         "blazar-base",
         "cyborg-base",
         "freezer-base",
-        "karbor-base",
         "kuryr-base",
-        "masakari-base",
         "monasca-base",
         "monasca-thresh",
-        "nova-mksproxy",
-        "qinling-base",
-        "searchlight-base",
         "solum-base",
         "vmtp",
         "zun-base",
@@ -163,12 +158,15 @@ UNBUILDABLE_IMAGES = {
         "kibana",         # no binary package
     },
 
+    "centos+binary": {
+        "masakari-base",
+    },
+
     'debian+binary': {
         "cloudkitty-base",
-        "ec2-api",
         "ironic-neutron-agent",
+        "masakari-base",
         "nova-serialproxy",
-        "novajoin-base",
         "senlin-conductor",  # no binary package
         "senlin-health-manager",  # no binary package
         "tacker-base",
@@ -177,15 +175,12 @@ UNBUILDABLE_IMAGES = {
 
     'ubuntu+binary': {
         "cloudkitty-base",
-        "ec2-api",
         "ironic-neutron-agent",
-        "novajoin-base",
         "rally",
         "senlin-conductor",  # no binary package
         "senlin-health-manager",  # no binary package
         "tacker-base",
         "vitrage-base",
-        "zaqar",
         "neutron-mlnx-agent",
     },
 }
@@ -767,6 +762,7 @@ class KollaWorker(object):
         self.image_statuses_unmatched = dict()
         self.image_statuses_skipped = dict()
         self.image_statuses_unbuildable = dict()
+        self.image_statuses_allowed_to_fail = dict()
         self.maintainer = conf.maintainer
         self.distro_python_version = conf.distro_python_version
 
@@ -1161,12 +1157,19 @@ class KollaWorker(object):
                     'name': name,
                 })
 
-        if self.image_statuses_bad:
+        if self.image_statuses_bad or self.image_statuses_allowed_to_fail:
             LOG.info("===========================")
             LOG.info("Images that failed to build")
             LOG.info("===========================")
-            for name, status in sorted(self.image_statuses_bad.items()):
-                LOG.error('%s Failed with status: %s', name, status.value)
+            all_bad_statuses = self.image_statuses_bad.copy()
+            all_bad_statuses.update(self.image_statuses_allowed_to_fail)
+            for name, status in sorted(all_bad_statuses.items()):
+                if name in self.image_statuses_allowed_to_fail:
+                    LOG.error('%s Failed with status: %s (allowed to fail)',
+                              name, status.value)
+                else:
+                    LOG.error('%s Failed with status: %s', name, status.value)
+
                 results['failed'].append({
                     'name': name,
                     'status': status.value,
@@ -1219,12 +1222,14 @@ class KollaWorker(object):
                 self.image_statuses_good,
                 self.image_statuses_unmatched,
                 self.image_statuses_skipped,
-                self.image_statuses_unbuildable]):
+                self.image_statuses_unbuildable,
+                self.image_statuses_allowed_to_fail]):
             return (self.image_statuses_bad,
                     self.image_statuses_good,
                     self.image_statuses_unmatched,
                     self.image_statuses_skipped,
-                    self.image_statuses_unbuildable)
+                    self.image_statuses_unbuildable,
+                    self.image_statuses_allowed_to_fail)
         for image in self.images:
             if image.status == Status.BUILT:
                 self.image_statuses_good[image.name] = image.status
@@ -1235,12 +1240,17 @@ class KollaWorker(object):
             elif image.status == Status.UNBUILDABLE:
                 self.image_statuses_unbuildable[image.name] = image.status
             else:
-                self.image_statuses_bad[image.name] = image.status
+                if image.name in self.conf.allowed_to_fail:
+                    self.image_statuses_allowed_to_fail[
+                        image.name] = image.status
+                else:
+                    self.image_statuses_bad[image.name] = image.status
         return (self.image_statuses_bad,
                 self.image_statuses_good,
                 self.image_statuses_unmatched,
                 self.image_statuses_skipped,
-                self.image_statuses_unbuildable)
+                self.image_statuses_unbuildable,
+                self.image_statuses_allowed_to_fail)
 
     def build_image_list(self):
         def process_source_installation(image, section):
@@ -1411,8 +1421,9 @@ class KollaWorker(object):
 def run_build():
     """Build container images.
 
-    :return: A 4-tuple containing bad, good, unmatched and skipped container
-    image status dicts, or None if no images were built.
+    :return: A 6-tuple containing bad, good, unmatched, skipped,
+    unbuildable and allowed to fail container image status dicts,
+    or None if no images were built.
     """
     conf = cfg.ConfigOpts()
     common_config.parse(conf, sys.argv[1:], prog='kolla-build')
