@@ -145,7 +145,6 @@ UNBUILDABLE_IMAGES = {
     },
 
     'centos+aarch64': {
-        "elasticsearch",  # no binary package
         "hacluster-pcs",  # no binary package
         "influxdb",       # no binary package
         "kibana",         # no binary package
@@ -165,7 +164,6 @@ UNBUILDABLE_IMAGES = {
     'debian+binary': {
         "cloudkitty-base",
         "ironic-neutron-agent",
-        "masakari-base",
         "nova-serialproxy",
         "senlin-conductor",  # no binary package
         "senlin-health-manager",  # no binary package
