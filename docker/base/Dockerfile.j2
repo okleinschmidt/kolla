@@ -3,6 +3,9 @@ FROM {{ base_image }}:{{ base_distro_tag }}
 LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
 {% endblock %}
 
+# We use curl in this dockerfile so let configure it before first use
+COPY curlrc /root/.curlrc
+
 {% block base_lang %}
 # NOTE(yoctozepto): use a UTF-8 (Unicode) locale like standard image installs do
 # fixes issues arising from ascii fallback usage
@@ -83,7 +86,7 @@ COPY dnf.conf /etc/dnf/dnf.conf
         'https://artifacts.elastic.co/GPG-KEY-elasticsearch',
         'https://packages.grafana.com/gpg.key',
         'https://repos.influxdata.com/influxdb.key',
-        'https://www.rabbitmq.com/rabbitmq-release-signing-key.asc',
+        'https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc',
         'https://packages.treasuredata.com/GPG-KEY-td-agent',
     ] %}
 {% elif base_arch == 'aarch64' %}
@@ -96,7 +99,7 @@ COPY dnf.conf /etc/dnf/dnf.conf
 
     {% set base_yum_repo_keys = [
         'https://packages.grafana.com/gpg.key',
-        'https://www.rabbitmq.com/rabbitmq-release-signing-key.asc',
+        'https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc',
     ] %}
     # FIXME(mgoddard): Not available for CentOS 8 yet.
     #
@@ -192,8 +195,11 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 #
 
 {% set base_centos_yum_repo_packages = [
-    'centos-release-opstools',
+    'centos-release-advanced-virtualization',
     'centos-release-ceph-nautilus',
+    'centos-release-nfv-openvswitch',
+    'centos-release-opstools',
+    'centos-release-rabbitmq-38',
     'epel-release',
 ] %}
 
@@ -204,8 +210,15 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 {% set base_centos_yum_repos_to_enable = [
 ] %}
 
+# FIXME(hrw): entries not starting with 'centos-' (and 'centos-nfv-ovs') need
+# to go away - they are from delorean or rdo-release-wallaby package
+# https://review.rdoproject.org/r/c/rdo-infra/ansible-role-dlrn/+/33241
 {% set base_centos_yum_repos_to_disable = [
+    'advanced-virtualization',
+    'centos-nfv-ovs',
+    'centos-advanced-virtualization',
     'centos-ceph-nautilus',
+    'centos-nfv-openvswitch',
     'centos-opstools',
     'centos-rabbitmq-38',
 ] %}
@@ -254,6 +267,7 @@ RUN {{ macros.install_packages(base_centos_yum_repo_packages | customizable("cen
         'hostname',
         'iproute',
         'iscsi-initiator-utils',
+        'lsof',
         'lvm2',
         'ncurses',
         'procps-ng',
@@ -325,6 +339,7 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
    'gawk',
    'iproute2',
    'kmod',
+   'lsof',
    'lvm2',
    'netbase',
    'open-iscsi',
@@ -344,6 +359,7 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
     {# 901F9177AB97ACBE                         -- Treasure Data, Inc (Treasure Agent Official Signing key) <support@treasure-data.com> #}
     {# A20F259AEB9C94BB                         -- Sensuapp (Freight) <support@hw-ops.com> #}
     {# F1656F24C74CD1D8                         -- MariaDB Signing Key <signing-key@mariadb.org> #}
+    {# F77F1EDA57EBB1CC                         -- RabbitMQ Signing Key <info@rabbitmq.com> #}
     {% set base_apt_keys = [
       '391A9AA2147192839E9DB0315EDB1B62EC4926EA',
       '46095ACC8548582C1A2699A9D27D666CD88E42B4',
@@ -353,15 +369,16 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
       '901F9177AB97ACBE',
       'A20F259AEB9C94BB',
       'F1656F24C74CD1D8',
+      'F77F1EDA57EBB1CC',
     ] %}
     {% set remote_apt_keys = [
-      'https://www.rabbitmq.com/rabbitmq-release-signing-key.asc',
       'https://packages.grafana.com/gpg.key',
       'https://repos.influxdata.com/influxdb.key',
     ] %}
 {% elif base_distro == 'debian' %}
     {% set base_apt_keys = [
       '46095ACC8548582C1A2699A9D27D666CD88E42B4',
+      'F77F1EDA57EBB1CC',
     ] %}
     {% set remote_apt_keys = [
       'https://download.docker.com/linux/debian/gpg',
@@ -370,11 +387,7 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
       'https://packages.treasuredata.com/GPG-KEY-td-agent',
       'https://repos.influxdata.com/influxdb.key',
       'https://obs.linaro.org/repos/home:/marcin.juszkiewicz/debian-buster/Release.key',
-      'https://www.rabbitmq.com/rabbitmq-release-signing-key.asc',
     ] %}
-    {% set base_apt_packages = base_apt_packages +
-      ['sudo',]
-    %}
 {% endif %}
 
 {% block base_ubuntu_package_installation %}
@@ -413,7 +426,6 @@ COPY start.sh /usr/local/bin/kolla_start
 COPY copy_cacerts.sh /usr/local/bin/kolla_copy_cacerts
 COPY httpd_setup.sh /usr/local/bin/kolla_httpd_setup
 COPY sudoers /etc/sudoers
-COPY curlrc /root/.curlrc
 
 {% if use_dumb_init %}
 
