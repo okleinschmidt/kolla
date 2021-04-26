@@ -1,0 +1,48 @@
+FROM {{ namespace }}/{{ image_prefix }}openstack-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block adjutant_base_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='adjutant') }}
+
+{% if install_type == 'binary' %}
+    {% if base_package_type == 'rpm' %}
+
+RUN echo '{{ install_type }} not yet available for {{ base_distro }}' \
+    && /bin/false
+
+    {% elif base_package_type == 'deb' %}
+
+RUN echo '{{ install_type }} not yet available for {{ base_distro }}' \
+    && /bin/false
+
+    {% endif %}
+
+{{ macros.install_packages(adjutant_base_packages | customizable("packages")) }}
+
+{% elif install_type == 'source' %}
+
+{% set adjutant_base_pip_packages = [
+    '/adjutant'
+] %}
+
+ADD adjutant-base-archive /adjutant-base-source
+RUN ln -s adjutant-base-source/* adjutant \
+    && {{ macros.install_pip(adjutant_base_pip_packages | customizable("pip_packages")) }} \
+    && mkdir -p /etc/adjutant  \
+    && cp -r /adjutant/etc/* /etc/adjutant/ \
+    && chown -R adjutant: /etc/adjutant \
+    && pip install -r /adjutant/requirements.txt
+
+{% endif %}
+
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+
+RUN touch /usr/local/bin/kolla_adjutant_extend_start \
+    && chmod 755 /usr/local/bin/kolla_extend_start /usr/local/bin/kolla_adjutant_extend_start
+
+{% block adjutant_base_footer %}{% endblock %}

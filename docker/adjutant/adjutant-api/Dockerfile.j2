@@ -1,0 +1,58 @@
+FROM {{ namespace }}/{{ image_prefix }}adjutant-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block adjutant_api_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% if install_type == 'binary' %}
+    {% if base_package_type == 'rpm' %}
+
+        {% set adjutant_api_packages = [
+                'httpd',
+                'mod_ssl',
+                'openstack-adjutant-api',
+                'python3-mod_wsgi'
+        ] %}
+{{ macros.install_packages(adjutant_api_packages | customizable("packages")) }}
+RUN sed -i -r 's,^(Listen 80),#\1,' /etc/httpd/conf/httpd.conf \
+    && sed -i -r 's,^(Listen 443),#\1,' /etc/httpd/conf.d/ssl.conf
+
+    {% elif base_package_type == 'deb' %}
+
+RUN echo '{{ install_type }} not yet available for {{ base_distro }}' \
+    && /bin/false
+
+    {% endif %}
+
+{% elif install_type == 'source' %}
+
+    {% if base_package_type == 'rpm' %}
+        {% set adjutant_api_packages = [
+                'httpd',
+                'mod_ssl',
+                'python3-mod_wsgi'
+        ] %}
+{{ macros.install_packages(adjutant_api_packages | customizable("packages")) }}
+RUN sed -i -r 's,^(Listen 80),#\1,' /etc/httpd/conf/httpd.conf \
+    && sed -i -r 's,^(Listen 443),#\1,' /etc/httpd/conf.d/ssl.conf
+
+    {% elif base_package_type == 'deb' %}
+        {% set adjutant_api_packages = [
+                'apache2',
+                'libapache2-mod-wsgi-py3'
+        ] %}
+{{ macros.install_packages(adjutant_api_packages | customizable("packages")) }}
+RUN echo > /etc/apache2/ports.conf
+
+    {% endif %}
+
+{% endif %}
+
+COPY extend_start.sh /usr/local/bin/kolla_adjutant_extend_start
+RUN chmod 755 /usr/local/bin/kolla_adjutant_extend_start
+
+{% block adjutant_api_footer %}{% endblock %}
+{% block footer %}{% endblock %}
