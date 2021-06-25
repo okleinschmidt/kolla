@@ -20,18 +20,19 @@ from kolla.version import version_info as version
 
 
 BASE_OS_DISTRO = ['centos', 'rhel', 'ubuntu', 'debian']
-BASE_ARCH = ['x86_64', 'ppc64le', 'aarch64']
+BASE_ARCH = ['x86_64', 'aarch64']
 DEFAULT_BASE_TAGS = {
     'centos': {'name': 'quay.io/centos/centos', 'tag': 'stream8'},
     'rhel': {'name': 'registry.access.redhat.com/ubi8', 'tag': 'latest'},
-    'debian': {'name': 'debian', 'tag': '10'},
+    'debian': {'name': 'debian', 'tag': 'bullseye'},
     'ubuntu': {'name': 'ubuntu', 'tag': '20.04'},
 }
-DISTRO_RELEASE = {
-    'centos': '8',
-    'rhel': '8',
-    'debian': '10',
-    'ubuntu': '20.04',
+# NOTE(hrw): has to match PRETTY_NAME in /etc/os-release
+DISTRO_PRETTY_NAME = {
+    'centos': 'CentOS Stream 8',
+    'rhel': 'Red Hat Enterprise Linux 8',
+    'debian': 'Debian GNU/Linux bullseye',
+    'ubuntu': 'Ubuntu 20.04',
 }
 OPENSTACK_RELEASE = 'wallaby'
 
@@ -105,8 +106,6 @@ _PROFILE_OPTS = [
                     'monasca',
                     'murano',
                     'octavia',
-                    'panko',
-                    'rally',
                     'redis',
                     'sahara',
                     'senlin',
@@ -173,7 +172,7 @@ _CLI_OPTS = [
                 help='Show all available images (filtering supported)'),
     cfg.StrOpt('namespace', short='n', default='kolla',
                help='The Docker namespace name'),
-    cfg.StrOpt('network_mode', default=None,
+    cfg.StrOpt('network_mode', default='host',
                help='The network mode for Docker build. Example: host'),
     cfg.BoolOpt('cache', default=True,
                 help='Use the Docker cache when building'),
@@ -307,10 +306,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/ceilometer/'
                      'ceilometer-${openstack_branch}.tar.gz')},
-    'ceilometer-base-plugin-panko': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/panko/'
-                     'panko-${openstack_branch}.tar.gz')},
     'cinder-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/cinder/'
@@ -569,10 +564,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/ovn-octavia-provider/'
                      'ovn-octavia-provider-${openstack_branch}.tar.gz')},
-    'panko-base': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/panko/'
-                     'panko-${openstack_branch}.tar.gz')},
     'placement-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/placement/'
@@ -653,14 +644,6 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/watcher-tempest-plugin/'
                      'watcher-tempest-plugin-2.2.0.tar.gz')},
-    'rally': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/rally/'
-                     'rally-3.2.0.tar.gz')},
-    'rally-plugin-openstack': {
-        'type': 'url',
-        'location': ('$tarballs_base/openstack/rally-openstack/'
-                     'rally-openstack-2.1.0.tar.gz')},
     'sahara-base': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/sahara/'
@@ -883,15 +866,11 @@ USERS = {
         'uid': 42437,
         'gid': 42437,
     },
-    'panko-user': {
-        'uid': 42438,
-        'gid': 42438,
-    },
     'rabbitmq-user': {
         'uid': 42439,
         'gid': 42439,
     },
-    'rally-user': {
+    'rally-user': {  # unused user (rally dropped)
         'uid': 42440,
         'gid': 42440,
     },

@@ -81,19 +81,8 @@ LOG = utils.make_a_logger()
 UNBUILDABLE_IMAGES = {
     'aarch64': {
         "bifrost-base",      # someone need to get upstream working first
-        "monasca-grafana",   # no phantomJS on aarch64
         "prometheus-mtail",  # no aarch64 binary
         "skydive-base",      # no aarch64 binary
-    },
-
-    'ppc64le': {
-        "elasticsearch",     # no binary package
-        "grafana",           # no binary package
-        "monasca-grafana",   # no phantomJS
-        "prometheus-base",   # no ppc64le binaries
-        "skydive-base",      # no ppc64le binaries
-        "telegraf",          # no binary package
-        "xtrabackup",        # no binary package
     },
 
     'binary': {
@@ -115,12 +104,6 @@ UNBUILDABLE_IMAGES = {
         "tempest",       # same reason as 'monasca-base'
     },
 
-    'source+ppc64le': {
-        "monasca-base",  # pypi 'confluent-kafka' requires newer libfdkafka-dev
-                         # than distributions have
-        "tempest",       # same reason as 'monasca-base'
-    },
-
     'centos': {
         "hacluster-pcs",         # Missing crmsh package
         "nova-spicehtml5proxy",  # Missing spicehtml5 package
@@ -131,8 +114,7 @@ UNBUILDABLE_IMAGES = {
     'debian': {
         "bifrost-base",  # tries to install 'mysql-server' which is not in
                          # Debian 'buster'
-        "monasca-grafana",  # FIXME(hrw): some ssl issues to fix
-        "ovsdpdk",
+        "ovn-base",      # needs more checking
         "qdrouterd",
     },
 
@@ -151,30 +133,20 @@ UNBUILDABLE_IMAGES = {
         "telegraf",       # no binary package
     },
 
-    'centos+ppc64le': {
-        "hacluster-pcs",  # no binary package
-        "influxdb",       # no binary package
-        "kibana",         # no binary package
-    },
-
     "centos+binary": {
         "masakari-base",
     },
 
     'debian+binary': {
-        "cloudkitty-base",
-        "ironic-neutron-agent",
-        "nova-serialproxy",
-        "senlin-conductor",  # no binary package
-        "senlin-health-manager",  # no binary package
-        "tacker-base",
-        "neutron-mlnx-agent",
+        "cloudkitty-base",       # no support in Dockerfile
+        "ironic-neutron-agent",  # no support in Dockerfile
+        "nova-serialproxy",      # no binary package
+        "tacker-base",           # no binary package
     },
 
     'ubuntu+binary': {
         "cloudkitty-base",
         "ironic-neutron-agent",
-        "rally",
         "senlin-conductor",  # no binary package
         "senlin-health-manager",  # no binary package
         "tacker-base",
@@ -679,8 +651,6 @@ class KollaWorker(object):
             self.debian_arch = 'arm64'
         elif self.base_arch == 'x86_64':
             self.debian_arch = 'amd64'
-        elif self.base_arch == 'ppc64le':
-            self.debian_arch = 'ppc64el'
         self.images = list()
         self.openstack_release = conf.openstack_release
         self.docker_healthchecks = conf.docker_healthchecks
@@ -696,7 +666,7 @@ class KollaWorker(object):
         if self.base in rh_base:
             self.conf.distro_python_version = "3.6"
         elif self.base in ['debian']:
-            self.conf.distro_python_version = "3.7"
+            self.conf.distro_python_version = "3.9"
         elif self.base in ['ubuntu']:
             self.conf.distro_python_version = "3.8"
         else:
@@ -782,6 +752,7 @@ class KollaWorker(object):
             PROJECT_ROOT,
             os.path.join(sys.prefix, 'share/kolla'),
             os.path.join(sys.prefix, 'local/share/kolla'),
+            os.path.join(os.getenv('HOME', ''), '.local/share/kolla'),
             # NOTE(zioproto): When Kolla is used within a snap, the env var
             #                 $SNAP is the directory where the snap is mounted.
             #                 https://github.com/zioproto/snap-kolla
@@ -917,7 +888,7 @@ class KollaWorker(object):
 
     def create_dockerfiles(self):
         kolla_version = version.version_info.cached_version_string()
-        supported_distro_release = common_config.DISTRO_RELEASE.get(
+        supported_distro_name = common_config.DISTRO_PRETTY_NAME.get(
             self.base)
         for path in self.docker_build_paths:
             template_name = "Dockerfile.j2"
@@ -933,7 +904,7 @@ class KollaWorker(object):
                       'base_package_type': self.base_package_type,
                       'debian_arch': self.debian_arch,
                       'docker_healthchecks': self.docker_healthchecks,
-                      'supported_distro_release': supported_distro_release,
+                      'supported_distro_name': supported_distro_name,
                       'install_metatype': self.install_metatype,
                       'image_prefix': self.image_prefix,
                       'infra_image_prefix': self.infra_image_prefix,

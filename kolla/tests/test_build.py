@@ -166,8 +166,8 @@ class TasksTest(base.TestCase):
 
         mock_client().build.assert_called_once_with(
             path=self.image.path, tag=self.image.canonical_name, decode=True,
-            network_mode=None, nocache=False, rm=True, pull=True, forcerm=True,
-            buildargs=None)
+            network_mode='host', nocache=False, rm=True, pull=True,
+            forcerm=True, buildargs=None)
 
         self.assertTrue(builder.success)
 
@@ -176,14 +176,14 @@ class TasksTest(base.TestCase):
     def test_build_image_with_network_mode(self, mock_client):
         self.dc = mock_client
         push_queue = mock.Mock()
-        self.conf.set_override('network_mode', 'host')
+        self.conf.set_override('network_mode', 'bridge')
 
         builder = build.BuildTask(self.conf, self.image, push_queue)
         builder.run()
 
         mock_client().build.assert_called_once_with(
             path=self.image.path, tag=self.image.canonical_name, decode=True,
-            network_mode='host', nocache=False, rm=True, pull=True,
+            network_mode='bridge', nocache=False, rm=True, pull=True,
             forcerm=True, buildargs=None)
 
         self.assertTrue(builder.success)
@@ -203,8 +203,8 @@ class TasksTest(base.TestCase):
 
         mock_client().build.assert_called_once_with(
             path=self.image.path, tag=self.image.canonical_name, decode=True,
-            network_mode=None, nocache=False, rm=True, pull=True, forcerm=True,
-            buildargs=build_args)
+            network_mode='host', nocache=False, rm=True, pull=True,
+            forcerm=True, buildargs=build_args)
 
         self.assertTrue(builder.success)
 
@@ -222,8 +222,8 @@ class TasksTest(base.TestCase):
 
         mock_client().build.assert_called_once_with(
             path=self.image.path, tag=self.image.canonical_name, decode=True,
-            network_mode=None, nocache=False, rm=True, pull=True, forcerm=True,
-            buildargs=build_args)
+            network_mode='host', nocache=False, rm=True, pull=True,
+            forcerm=True, buildargs=build_args)
 
         self.assertTrue(builder.success)
 
@@ -243,8 +243,8 @@ class TasksTest(base.TestCase):
 
         mock_client().build.assert_called_once_with(
             path=self.image.path, tag=self.image.canonical_name, decode=True,
-            network_mode=None, nocache=False, rm=True, pull=True, forcerm=True,
-            buildargs=build_args)
+            network_mode='host', nocache=False, rm=True, pull=True,
+            forcerm=True, buildargs=build_args)
 
         self.assertTrue(builder.success)
 
@@ -370,6 +370,8 @@ class KollaWorkerTest(base.TestCase):
                 itertools.product(rh_base, rh_type),
                 itertools.product(deb_base, deb_type)):
             self.conf.set_override('base', base_distro)
+            if base_distro == 'debian' and install_type == 'binary':
+                self.conf.set_override('base_arch', 'x86_64')
             self.conf.set_override('install_type', install_type)
             # should no exception raised
             build.KollaWorker(self.conf)
@@ -528,8 +530,9 @@ class KollaWorkerTest(base.TestCase):
     def test_build_distro_python_version_debian(self):
         """check distro_python_version for Debian"""
         self.conf.set_override('base', 'debian')
+        self.conf.set_override('install_type', 'source')
         kolla = build.KollaWorker(self.conf)
-        self.assertEqual('3.7', kolla.distro_python_version)
+        self.assertEqual('3.9', kolla.distro_python_version)
 
     def test_build_distro_python_version_rhel80(self):
         """check distro_python_version for RHEL8.0"""
@@ -581,6 +584,7 @@ class KollaWorkerTest(base.TestCase):
     def test_build_distro_package_manager_debian(self):
         """check distro_package_manager apt for debian"""
         self.conf.set_override('base', 'debian')
+        self.conf.set_override('install_type', 'source')
         kolla = build.KollaWorker(self.conf)
         self.assertEqual('apt', kolla.distro_package_manager)
 
@@ -605,6 +609,7 @@ class KollaWorkerTest(base.TestCase):
     def test_base_package_type_debian(self):
         """check base_package_type deb for debian"""
         self.conf.set_override('base', 'debian')
+        self.conf.set_override('install_type', 'source')
         kolla = build.KollaWorker(self.conf)
         self.assertEqual('deb', kolla.base_package_type)
 

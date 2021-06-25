@@ -37,20 +37,6 @@ centos-aarch64:
   rabbitmq: "rabbitmq_rabbitmq-server"
   td-agent: "treasuredata"
 
-centos-ppc64le:
-  ceph: "centos-ceph-nautilus"
-  elasticsearch: "elasticsearch-kibana-logstash-7.x"
-  epel: "epel"
-  epel-modular: "epel-modular"
-  extras: "extras"
-  hacluster: "ha"
-  libvirt: "centos-advanced-virtualization"
-  logstash: "elasticsearch-kibana-logstash-7.x"
-  openvswitch: "centos-nfv-openvswitch"
-  opstools: "centos-opstools"
-  powertools: "powertools"
-  rabbitmq: "rabbitmq_rabbitmq-server"
-
 rhel:
   erlang: "centos-rabbitmq-38"
   hacluster: "ha"
@@ -63,7 +49,6 @@ debian:
   erlang: "deb http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu bionic main"
   grafana: "deb https://packages.grafana.com/oss/deb stable main"
   influxdb: "deb https://repos.influxdata.com/debian buster stable"
-  libvirt: "deb https://obs.linaro.org/repos/home:/marcin.juszkiewicz:/kolla-wallaby/debian-buster ./"
   logstash: "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main"
   kibana: "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main"
   rabbitmq: "deb https://packagecloud.io/rabbitmq/rabbitmq-server/debian/ buster main"
@@ -76,7 +61,6 @@ debian-aarch64:
   influxdb: "deb https://repos.influxdata.com/debian buster stable"
   logstash: "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main"
   kibana: "deb [arch=amd64] https://artifacts.elastic.co/packages/oss-7.x/apt stable main"
-  libvirt: "deb https://obs.linaro.org/repos/home:/marcin.juszkiewicz:/kolla-wallaby/debian-buster ./"
   rabbitmq: "deb https://packagecloud.io/rabbitmq/rabbitmq-server/debian/ buster main"
   td-agent: "deb http://packages.treasuredata.com/4/debian/buster buster contrib"
 
@@ -101,7 +85,3 @@ ubuntu-aarch64:
   mariadb: "deb http://downloads.mariadb.com/MariaDB/mariadb-10.3/repo/ubuntu focal main"
   rabbitmq: "deb https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main"
   td-agent: "deb http://packages.treasuredata.com/4/ubuntu/focal/ focal contrib"
-
-ubuntu-ppc64le:
-  mariadb: "deb http://downloads.mariadb.com/MariaDB/mariadb-10.3/repo/ubuntu focal main"
-  rabbitmq: "deb https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main"

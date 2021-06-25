@@ -32,14 +32,14 @@ iscsid,C,C,C,C,N,C
 kafka,C,C,C,C,N,C
 keepalived,C,C,C,C,N,C
 keystone,C,C,C,C,N,C
-kibana,N,N,N,N,C,C
+kibana,N,N,N,N,N,C
 kolla-toolbox,C,C,C,C,N,C
 kuryr,N,C,N,C,N,C
 logstash,C,C,C,C,N,C
 magnum,C,C,C,C,N,C
 manila,C,C,C,C,N,C
 mariadb,C,C,C,C,N,C
-masakari,N,C,C,C,C,C
+masakari,N,C,C,C,N,C
 memcached,C,C,C,C,N,C
 mistral,C,C,C,C,N,C
 monasca,N,N,N,N,N,N
@@ -51,14 +51,12 @@ nova,C,C,C,C,N,C
 nova-spicehtml5proxy,N,N,C,C,N,C
 octavia,C,C,N,C,N,C
 openvswitch,C,C,C,C,N,C
-ovn,C,C,C,C,N,C
-ovsdpdk,N,N,C,C,N,N
-panko,C,C,C,C,N,C
+ovn,C,C,C,C,N,N
+ovsdpdk,N,N,C,C,N,C
 placement,C,C,N,C,N,C
 prometheus,C,C,C,C,N,C
 qdrouterd,C,C,C,C,N,N
 rabbitmq,C,C,C,C,N,C
-rally,C,C,N,C,N,C
 redis,C,C,C,C,N,C
 sahara,C,C,C,C,N,C
 senlin,C,C,C,C,N,C
@@ -68,7 +66,7 @@ storm,C,C,C,C,N,C
 swift,C,C,C,C,N,C
 tacker,C,C,N,C,N,C
 telegraf,N,N,N,N,N,N
-tempest,C,N,C,N,N,N
+tempest (deprecated),C,N,C,N,N,N
 tgtd,C,C,C,C,N,C
 trove,C,C,N,C,N,C
 vitrage,C,C,N,C,N,C

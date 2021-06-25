@@ -104,8 +104,11 @@ function config_heat_dashboard {
     done
 
     config_dashboard "${ENABLE_HEAT:-no}" \
-        "${SITE_PACKAGES}/heat_dashboard/conf/heat_policy.json" \
-        "/etc/openstack-dashboard/heat_policy.json"
+        "${SITE_PACKAGES}/heat_dashboard/conf/heat_policy.yaml" \
+        "/etc/openstack-dashboard/heat_policy.yaml"
+    config_dashboard "${ENABLE_HEAT:-no}" \
+        "${SITE_PACKAGES}/heat_dashboard/conf/default_policies/heat.yaml" \
+        "/etc/openstack-dashboard/default_policies/heat.yaml"
 }
 
 function config_ironic_dashboard {
@@ -130,6 +133,13 @@ function config_manila_ui {
             "${SITE_PACKAGES}/manila_ui/local/enabled/${file##*/}" \
             "${SITE_PACKAGES}/openstack_dashboard/local/enabled/${file##*/}"
     done
+
+    config_dashboard "${ENABLE_MANILA:-no}" \
+        "${SITE_PACKAGES}/manila_ui/conf/manila_policy.yaml" \
+        "/etc/openstack-dashboard/manila_policy.yaml"
+    config_dashboard "${ENABLE_MANILA:-no}" \
+        "${SITE_PACKAGES}/manila_ui/conf/default_policies/manila.yaml" \
+        "/etc/openstack-dashboard/default_policies/manila.yaml"
 }
 
 function config_masakari_dashboard {
@@ -152,7 +162,7 @@ function config_monasca_ui {
         "${SITE_PACKAGES}/openstack_dashboard/local/enabled/_50_admin_add_monitoring_panel.py"
     config_dashboard "${ENABLE_MONASCA:-no}" \
         "${SITE_PACKAGES}/monitoring/conf/monitoring_policy.json" \
-        "${SITE_PACKAGES}/openstack_dashboard/conf/monitoring_policy.json"
+        "/etc/openstack-dashboard/monitoring_policy.json"
 }
 
 function config_murano_dashboard {

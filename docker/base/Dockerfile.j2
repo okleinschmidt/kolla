@@ -3,6 +3,11 @@ FROM {{ base_image }}:{{ base_distro_tag }}
 LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
 {% endblock %}
 
+RUN . /etc/os-release;\
+    if [ "${PRETTY_NAME#{{ supported_distro_name }}}" = "$PRETTY_NAME" ]; then \
+        echo "Only releases \"{{ supported_distro_name }}\" are supported on {{ base_distro }}"; false; \
+    fi
+
 # We use curl in this dockerfile so let configure it before first use
 COPY curlrc /root/.curlrc
 
@@ -45,11 +50,7 @@ ENV PS1="$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(ho
 # enables to provide repo overrides at a later date in a simple fashion if we
 # desire such functionality.  I think we will :)
 
-RUN CURRENT_DISTRO_RELEASE=$(awk '{match($0, /[0-9]+/,version)}END{print version[0]}' /etc/system-release); \
-    if [  $CURRENT_DISTRO_RELEASE != "{{ supported_distro_release }}" ]; then \
-        echo "Only releases '{{ supported_distro_release }}' are supported on {{ base_distro }}"; false; \
-    fi \
-    && cat /tmp/kolla_bashrc >> /etc/bashrc \
+RUN cat /tmp/kolla_bashrc >> /etc/bashrc \
     && sed -i 's|^\(override_install_langs=.*\)|# \1|' /etc/dnf/dnf.conf
 
 {% block base_dnf_conf %}
@@ -105,36 +106,11 @@ COPY dnf.conf /etc/dnf/dnf.conf
     #
     #   'https://artifacts.elastic.co/GPG-KEY-elasticsearch',
     #
-{% elif base_arch == 'ppc64le' %}
-    {% set base_yum_repo_files = [
-        'rabbitmq_rabbitmq-server.repo',
-    ] %}
-    # FIXME(mgoddard): Not available for CentOS 8 yet.
-    #
-    #   'elasticsearch.repo',
-    #
-
-    {% set base_yum_repo_keys = [
-    ] %}
-    # FIXME(mgoddard): Not available for CentOS 8 yet.
-    #
-    #   'https://artifacts.elastic.co/GPG-KEY-elasticsearch',
-    #
 {% endif %}
 
 {%- for repo_file in base_yum_repo_files | customizable('yum_repo_files') %}
 COPY {{ repo_file }} /etc/yum.repos.d/{{ repo_file }}
 {%- endfor %}
-
-# NOTE(hrw): 'rabbitmq-server' is 'noarch' so we can install it on ppc64le from
-# repo for other architecture.
-# NOTE(mjturek): tripleo-ci overrides these repos so the file would not exist
-# in that case. We test for the file's existence to avoid sed failing in that case.
-{% if base_arch == 'ppc64le' %}
-RUN if [[ -e /etc/yum.repos.d/rabbitmq_rabbitmq-server.repo ]]; then \
-      sed -i -e 's/\$basearch/x86_64/g' /etc/yum.repos.d/rabbitmq_rabbitmq-server.repo; \
-    fi
-{% endif %}
 
 {% block base_centos_repo_overrides_post_copy %}{% endblock %}
 
@@ -182,17 +158,10 @@ RUN rm -f /etc/rpm/macros.image-language-conf \
     {% if base_distro == 'centos' %}
 
 {% block base_centos_gpg_key_import %}
-RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 {% endblock %}
 
 {% set base_centos_yum_repo_keys = [
-    '/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-OpsTools',
-    '/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-Storage',
 ] %}
-# FIXME(mgoddard): Not available for CentOS 8 yet.
-#
-#   '/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-Virtualization',
-#
 
 {% set base_centos_yum_repo_packages = [
     'centos-release-advanced-virtualization',
@@ -221,15 +190,13 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
     'centos-nfv-openvswitch',
     'centos-opstools',
     'centos-rabbitmq-38',
+    'epel',
+    'epel-modular',
 ] %}
 
 {% if base_arch == 'x86_64' %}
     {% set base_centos_yum_repos_to_disable = base_centos_yum_repos_to_disable + [
         'influxdb',
-    ] %}
-{% elif base_arch == 'aarch64' %}
-    {% set base_centos_yum_repo_packages = base_centos_yum_repo_packages + [
-        'centos-release-rabbitmq-38'
     ] %}
 {% endif %}
 
@@ -282,16 +249,9 @@ RUN {{ macros.install_packages(base_centos_yum_repo_packages | customizable("cen
 
 # Install base packages
 {{ macros.install_packages( base_centos_packages | customizable("centos_packages") | customizable("centos_binary_packages") | customizable("centos_source_packages") ) }}
-{{ macros.disable_extra_repos(['epel', 'epel-modular']) }}
 
 {# endif for base_package_type rpm #}
 {% elif base_package_type == 'deb' %}
-# Ensure lsb_release exists
-{{ macros.install_packages(['lsb-release']) }}
-
-RUN RELEASE=$(lsb_release -r -s); if [ $RELEASE != "{{ supported_distro_release }}" ]; then \
-        echo "Only release '{{ supported_distro_release }}' is supported on {{ base_distro }} while you have '$RELEASE'."; false; fi
-
 # Customize PS1 bash shell
 # enlarge 'system users' range so 'haproxy' package will not complain
 # see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=939470
@@ -328,6 +288,18 @@ COPY sources.list /etc/apt/sources.list.d/kolla-custom.list
 
 {% block base_debian_after_sources_list %}{% endblock %}
 
+{# install Debian Openstack repos - they are not mirrored on CI #}
+{% if base_distro == 'debian' %}
+
+RUN apt update \
+ && apt install -y --no-install-recommends extrepo \
+ && extrepo enable openstack_wallaby \
+ && apt purge -y extrepo \
+ && apt --purge autoremove -y \
+ && apt clean
+
+{% endif %}
+
 {% block base_ubuntu_package_apt_preferences %}
 COPY apt_preferences.{{ base_distro }} /etc/apt/preferences
 COPY apt_preferences /etc/apt/preferences.d/kolla-custom
@@ -359,7 +331,8 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
     {# 901F9177AB97ACBE                         -- Treasure Data, Inc (Treasure Agent Official Signing key) <support@treasure-data.com> #}
     {# A20F259AEB9C94BB                         -- Sensuapp (Freight) <support@hw-ops.com> #}
     {# F1656F24C74CD1D8                         -- MariaDB Signing Key <signing-key@mariadb.org> #}
-    {# F77F1EDA57EBB1CC                         -- RabbitMQ Signing Key <info@rabbitmq.com> #}
+    {# F77F1EDA57EBB1CC                         -- Launchpad RabbitMQ Erlang PPA key #}
+    {# F6609E60DC62814E                         -- PackageCloud RabbitMQ repository key #}
     {% set base_apt_keys = [
       '391A9AA2147192839E9DB0315EDB1B62EC4926EA',
       '46095ACC8548582C1A2699A9D27D666CD88E42B4',
@@ -370,6 +343,7 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
       'A20F259AEB9C94BB',
       'F1656F24C74CD1D8',
       'F77F1EDA57EBB1CC',
+      'F6609E60DC62814E',
     ] %}
     {% set remote_apt_keys = [
       'https://packages.grafana.com/gpg.key',
@@ -379,14 +353,13 @@ COPY apt_preferences /etc/apt/preferences.d/kolla-custom
     {% set base_apt_keys = [
       '46095ACC8548582C1A2699A9D27D666CD88E42B4',
       'F77F1EDA57EBB1CC',
+      'F6609E60DC62814E',
     ] %}
     {% set remote_apt_keys = [
       'https://download.docker.com/linux/debian/gpg',
       'https://packages.grafana.com/gpg.key',
-      'http://buster-ussuri.debian.net/debian/dists/pubkey.gpg',
       'https://packages.treasuredata.com/GPG-KEY-td-agent',
       'https://repos.influxdata.com/influxdb.key',
-      'https://obs.linaro.org/repos/home:/marcin.juszkiewicz/debian-buster/Release.key',
     ] %}
 {% endif %}
 
